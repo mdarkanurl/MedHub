@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcryptjs";
 import { UserCreateSchema } from "../schema";
-import prisma from "../prisma";
-import { accessToken, refreshToken } from "../utils/jwt";
+import UserService from "../services";
+import AppError from "../utils/errors/app-error";
+import { ErrorResponse, SuccessResponse } from "../utils/common";
 
 
 const signup = async (
@@ -11,59 +11,34 @@ const signup = async (
     next: NextFunction
 ) => {
     try {
-        const parsedBody = UserCreateSchema.parse(req.body);
+        // Validate the request body
+        const parseBody = UserCreateSchema.safeParse(req.body);
 
-        if(!parsedBody) {
-            res.status(400).json({
-                message: "Invalid request body"
-            });
+        if(!parseBody.success) {
+            ErrorResponse.message = "Invalid request body";
+            ErrorResponse.error = parseBody.error.errors;
+
+            res.status(400).json(ErrorResponse);
             return;
         }
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email: parsedBody.email,
-            }
-        });
 
-        if (existingUser) {
-            res.status(409).json({
-                message: "User already exists"
-            });
-            return;
-        }
+        const users = await UserService.createUser(
+            {
+                name: parseBody.data.name,
+                email: parseBody.data.email,
+                password: parseBody.data.password
+            }, res
+        );
 
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
-
-        const users = await prisma.user.create({
-            data: {
-                name: parsedBody.name,
-                email: parsedBody.email,
-                password: hashedPassword,
-            }
-        });
-
-        // Create a session
-        const token = refreshToken(users.id);
-        res.cookie("token", token, {
-            httpOnly: true,
-            sameSite: "strict"
-        });
-
-        res.status(201).json({
-            message: "User created successfully",
-            user: {
-                id: users.id,
-                email: users.email,
-                name: users.name,
-            },
-            token
-        });
-        return;
-    } catch (error) {
-        next(error);
+        SuccessResponse.message = "User created successfully";
+        SuccessResponse.data = users;
+        res.status(201).json(SuccessResponse);
+    } catch (error: Error | any) {
+        ErrorResponse.error = { errors: error };
+        res
+            .status(error.statusCode || 500)
+            .json(ErrorResponse);
     }
 }
 

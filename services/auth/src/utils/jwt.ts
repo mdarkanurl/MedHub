@@ -1,22 +1,37 @@
 import jwt from "jsonwebtoken";
+import { Response } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
-export const accessToken = (userId: string) => {
-    return jwt.sign(
+export const accessToken = (userId: string, res: Response) => {
+    const token = jwt.sign(
         { id: userId },
         JWT_SECRET,
         { expiresIn: "1h" }
     );
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict"
+    });
+
+    return token;
 };
 
 
-export const refreshToken = (userId: string) => {
-    return jwt.sign(
+export const refreshToken = (userId: string, res: Response) => {
+    const token = jwt.sign(
         { id: userId },
         JWT_SECRET,
         { expiresIn: "1y" }
     );
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "strict"
+    });
+
+    return token;
 };
 
 export const verifyToken = (token: string) => {
