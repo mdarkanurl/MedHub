@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  DOCTOR
+  RECEPTIONIST
+  NURSE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  profilePicture String?
+  phone     String?
+  birthDate DateTime?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Doctor {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  profilePicture String?
+  phone     String?
+  birthDate DateTime?
+  description String
+  category   String
+  education String
+  adminId String
+  role      Role     @default(DOCTOR)
+  ratings Rating[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Receptionist {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  profilePicture String?
+  phone     String?
+  birthDate DateTime?
+  contactInfo String
+  workingHours String
+  adminId String
+  role      Role     @default(RECEPTIONIST)
+  ratings Rating[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Nurse {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  profilePicture String?
+  phone     String?
+  birthDate DateTime?
+  workingHours String
+  adminId String
+  role      Role     @default(NURSE)
+  ratings Rating[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Rating {
+  id              String         @id @default(cuid())
+  doctorId        String?
+  nurseId         String?
+  receptionistId  String?
+  rating          Int?
+  comment         String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  doctor          Doctor?        @relation(fields: [doctorId], references: [id])
+  nurse           Nurse?         @relation(fields: [nurseId], references: [id])
+  receptionist    Receptionist?  @relation(fields: [receptionistId], references: [id])
+
+  @@unique([doctorId])
+  @@unique([nurseId])
+  @@unique([receptionistId])
+}
