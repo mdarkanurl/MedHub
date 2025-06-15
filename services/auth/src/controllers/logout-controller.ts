@@ -1,16 +1,16 @@
-import { Request, Response} from "express";
-import { UserCreateSchema } from "../schema";
+import { Request, Response } from "express";
+import { UserLogoutSchema } from "../schema";
 import UserService from "../services";
 import { ErrorResponse, SuccessResponse } from "../utils/common";
 
 
-const signup = async (
+const logout = async (
     req: Request,
     res: Response
 ) => {
     try {
         // Validate the request body
-        const parseBody = UserCreateSchema.safeParse(req.body);
+        const parseBody = UserLogoutSchema.safeParse(req.body);
 
         if(!parseBody.success) {
             ErrorResponse.message = "Invalid request body";
@@ -21,16 +21,15 @@ const signup = async (
         }
 
 
-        const users = await UserService.createUser(
+        await UserService.logoutUser(
             {
-                name: parseBody.data.name,
                 email: parseBody.data.email,
-                password: parseBody.data.password
-            }, res
+                password: parseBody.data.password,
+                res
+            }
         );
 
-        SuccessResponse.message = "User created successfully";
-        SuccessResponse.data = users;
+        SuccessResponse.message = "User loggout successfully";
         res.status(201).json(SuccessResponse);
     } catch (error: Error | any) {
         ErrorResponse.error = { errors: error };
@@ -40,4 +39,4 @@ const signup = async (
     }
 }
 
-export default signup;
+export default logout;

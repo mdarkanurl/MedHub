@@ -82,7 +82,34 @@ async function loginUser(data: { email: string, password: string, res: Response 
     }
 }
 
+async function logoutUser(data: {email: string, password: string, res: Response }) {
+    try {
+        // check if user exist or not
+        const users = await userRepo.getByEmail(data.email);
+
+        if(!users) {
+            throw new AppError('Invalid email', 400);
+        }
+
+        // Check the passowrd
+        const isPasswordValid = await bcrypt.compare(data.password, users.passowrd);
+
+        if(!isPasswordValid) {
+            throw new AppError('Inavlid password', 400);
+        }
+
+        // Clear the cookie
+        data.res.cookie("token", '');
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
 export default createUser;
 export {
-    loginUser
+    loginUser,
+    logoutUser
 }
