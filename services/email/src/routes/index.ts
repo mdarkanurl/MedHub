@@ -1,0 +1,1 @@
+export { default as emailRoutes } from "./v1/send-email";

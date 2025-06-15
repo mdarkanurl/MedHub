@@ -1,5 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
+import { emailRoutes } from "./routes";
 config();
 const app = express();
 
@@ -7,9 +8,9 @@ const app = express();
 app.use(express.json());
 
 // routes
-// app.use('/api', );
+app.use('/api', emailRoutes);
 
-const PORT = process.env.PORT || 4004
+const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
-    console.log(`App is running at PORT ${PORT}`)
+    console.log(`App is running at PORT ${PORT}`);
 });

@@ -14,19 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum EmailStatus {
-  PENDING
-  SENT
-  FAILED
-}
-
 model Email {
   id        String   @id @default(cuid())
   from      String
   to        String
   subject   String
   body      String
-  status    EmailStatus   @default(PENDING)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
