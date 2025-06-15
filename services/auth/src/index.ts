@@ -1,7 +1,7 @@
 import express from "express";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
-import { apiRoutes } from "./routes";
+import apiRoutes from "./routes";
 config();
 const app = express();
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import v1Route from "./v1";
+import { login } from "../../controllers";
 const router = Router();
 
-router.use('/v1', v1Route);
+router.post('/', login);
 
 export default router;
