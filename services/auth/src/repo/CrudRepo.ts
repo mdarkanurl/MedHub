@@ -35,7 +35,7 @@ export class CrudRepo<T extends { id: string }> {
         return await this.model.findMany();
     }
 
-    async getById(id: string): Promise<T | null> {
+    async getById(id: string) {
         return await this.model.findUnique({
             where: { id },
         });

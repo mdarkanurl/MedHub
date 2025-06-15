@@ -5,6 +5,7 @@ const userRepo = new UserCrudRepo();
 
 import bcrypt from "bcryptjs";
 import { refreshToken } from "../utils/jwt";
+import { CustomRequest } from "../utils/customReq";
 
 async function createUser(data: any, res: Response) {
     try {
@@ -91,11 +92,11 @@ async function logoutUser(data: {email: string, password: string, res: Response 
             throw new AppError('Invalid email', 400);
         }
 
-        // Check the passowrd
-        const isPasswordValid = await bcrypt.compare(data.password, users.passowrd);
+        // Check the password
+        const isPasswordValid = await bcrypt.compare(data.password, users.password);
 
         if(!isPasswordValid) {
-            throw new AppError('Inavlid password', 400);
+            throw new AppError('Invalid password', 400);
         }
 
         // Clear the cookie
@@ -108,8 +109,35 @@ async function logoutUser(data: {email: string, password: string, res: Response 
     }
 }
 
+async function getMe(data: { req: CustomRequest }) {
+    try {
+        const userId = data?.req?.userId
+
+        if(!userId) {
+            throw new AppError("Token is valid but missing user ID. Please log in again.", 403);
+        }
+
+        const users = await userRepo.getById(userId);
+
+        if(!users) {
+            throw new AppError("Invalid user ID. User not found", 400);
+        }
+        
+        return {
+            ...users,
+            password: (users.password = undefined), // Exclude password from response
+        };
+    } catch (error) {
+         if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
 export default createUser;
 export {
     loginUser,
-    logoutUser
+    logoutUser,
+    getMe
 }

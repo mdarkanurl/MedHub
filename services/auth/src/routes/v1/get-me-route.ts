@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { logout } from "../../controllers";
+import { getMe } from "../../controllers";
 import { isLogin } from "../../middlewares";
 const router = Router();
 
-router.post('/', isLogin, logout);
+router.get('/', isLogin, getMe);
 
 export default router;
