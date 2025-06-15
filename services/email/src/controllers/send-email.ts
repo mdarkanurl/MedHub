@@ -1,7 +1,7 @@
 import e, { Request, Response, NextFunction } from "express";
 import emailSchema from "../schema/sendEmail";
 import { ErrorResponse } from "../utils/common";
-import { emailService } from "../services";
+import { saveEmail } from "../services";
 
 const sendEmail = async (
     req: Request,
@@ -21,7 +21,7 @@ const sendEmail = async (
         }
 
 
-        const sendEmail = await emailService({
+        const sendEmail = await saveEmail({
             subject: parseBody.data.subject,
             body: parseBody.data.body,
             to: parseBody.data.to

@@ -1,6 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
-import { emailRoutes } from "./routes";
+import routes from "./routes";
 config();
 const app = express();
 
@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 // routes
-app.use('/api', emailRoutes);
+app.use('/api', routes);
 
 const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {

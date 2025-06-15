@@ -1,1 +1,1 @@
-export { default as emailService } from "../services/email-service";
+export { saveEmail, getEmails } from "../services/email-service";

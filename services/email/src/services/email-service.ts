@@ -30,4 +30,20 @@ async function saveEmail(data: { subject: string; body: string; to: string }) {
     }
 }
 
-export default saveEmail;
+async function getEmails() {
+    try {
+        const emails = await emailRepo.getAll();
+        if (!emails || emails.length === 0) {
+            throw new AppError("No emails found in the database", 404);
+        }
+
+        return emails;
+    } catch (error) {
+        throw new AppError("Failed to get email from database", 500);
+    }
+}
+
+export {
+    saveEmail,
+    getEmails
+}
