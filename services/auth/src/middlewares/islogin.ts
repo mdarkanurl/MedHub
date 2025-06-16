@@ -1,13 +1,8 @@
-import jwt from "jsonwebtoken";
 import { Response, NextFunction } from "express";
-import AppError from "../utils/errors/app-error";
 import { config } from "dotenv";
-import { ErrorResponse } from "../utils/common";
 import { CustomRequest } from "../utils/customReq";
+import { verifyAccessToken } from "../utils/jwt";
 config();
-
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
-
 
 const isLogin = async (
     req: CustomRequest,
@@ -15,34 +10,42 @@ const isLogin = async (
     next: NextFunction
 ) => {
     try {
-        const token =  req?.cookies?.token;
+        const tokenWithBearer = req.headers['authorization'];
+        const token = tokenWithBearer?.split(' ')[1];
 
         if(!token) {
-            throw new AppError("You're unauthenticated", 403);
+            res.status(403).json({
+                Success: false,
+                Message: 'Access token doesn\'t exist',
+                Data: {},
+                Error: {}
+            });
+            return;
         }
 
-        // Verify the token
-        let decodedToken;
-        try {
-            decodedToken = jwt.verify(token, JWT_SECRET) as { id: string };
+        const verifyToken = verifyAccessToken(token);
 
-        } catch (jwtError: any) {
-
-            if (jwtError.name === 'TokenExpiredError') {
-                throw new AppError("Your session has expired. Please log in again.", 401);
-            }
-            
-            throw new AppError("Invalid or corrupted token. Please log in again.", 401);
+        if(!verifyToken) {
+            res.status(400).json({
+                Success: false,
+                Message: 'Invalid access token',
+                Data: {},
+                Error: {}
+            });
+            return;
         }
-
-        req.userId = decodedToken.id as string;
+        req.userId = verifyToken.id;
 
         next();
     } catch (error: Error | any) {
-        ErrorResponse.error = { errors: error };
         res
             .status(error.statusCode || 500)
-            .json(ErrorResponse);
+            .json({
+                Success: false,
+                Message: error?.message,
+                Data: {},
+                Error: { ...error }
+            });
     }
 }
 

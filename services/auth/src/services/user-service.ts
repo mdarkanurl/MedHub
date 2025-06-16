@@ -4,7 +4,7 @@ import AppError from "../utils/errors/app-error";
 const userRepo = new UserCrudRepo();
 
 import bcrypt from "bcryptjs";
-import { refreshToken } from "../utils/jwt";
+import { accessTokenFunc, refreshTokenFunv } from "../utils/jwt";
 import { CustomRequest } from "../utils/customReq";
 
 async function createUser(data: any, res: Response) {
@@ -24,11 +24,12 @@ async function createUser(data: any, res: Response) {
             password: hashedPassword
         });
 
-        // Create a session
-        const token = refreshToken(users.id, res);
+        // Create a token
+        const refreshToken = refreshTokenFunv(users.id, res);
+        const accessToken = accessTokenFunc(users.id) as string;
 
-        if (!token) {
-            throw new AppError("Failed to create session", 500);
+        if (!refreshToken || !accessToken) {
+            throw new AppError("Failed to create token", 500);
         }
 
         return {
@@ -37,7 +38,7 @@ async function createUser(data: any, res: Response) {
                 email: users.email,
                 name: users.name,
             },
-            token
+            accessToken
         };
     } catch (error) {
         if (error instanceof AppError) {
@@ -64,16 +65,17 @@ async function loginUser(data: { email: string, password: string, res: Response 
         }
 
         // Create a session
-        const token = refreshToken(users.id, data.res);
+        const refreshToken = refreshTokenFunv(users.id, data.res);
+        const accessToken = accessTokenFunc(users.id);
 
-        if (!token) {
-            throw new AppError("Failed to create session", 500);
+        if (!refreshToken || !accessToken) {
+            throw new AppError("Failed to create token", 500);
         }
 
         return {
             userId: users.id,
             email: users.email,
-            token
+            accessToken
         }
     } catch (error) {
         if (error instanceof AppError) {
@@ -128,7 +130,7 @@ async function getMe(data: { req: CustomRequest }) {
             password: (users.password = undefined), // Exclude password from response
         };
     } catch (error) {
-         if (error instanceof AppError) {
+        if (error instanceof AppError) {
             throw error;
         }
         throw new AppError("Internal server error", 500);

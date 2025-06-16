@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { UserLogoutSchema } from "../schema";
 import UserService from "../services";
-import { ErrorResponse, SuccessResponse } from "../utils/common";
 
 
 const logout = async (
@@ -13,10 +12,12 @@ const logout = async (
         const parseBody = UserLogoutSchema.safeParse(req.body);
 
         if(!parseBody.success) {
-            ErrorResponse.message = "Invalid request body";
-            ErrorResponse.error = parseBody.error.errors;
-
-            res.status(400).json(ErrorResponse);
+            res.status(400).json({
+                Success: false,
+                Message: 'Invalid request body',
+                Data: {},
+                Error: parseBody.error.errors
+            });
             return;
         }
 
@@ -29,13 +30,21 @@ const logout = async (
             }
         );
 
-        SuccessResponse.message = "User loggout successfully";
-        res.status(201).json(SuccessResponse);
+        res.status(201).json({
+            Success: true,
+            Message: 'User loggout successfully',
+            Data: {},
+            Error: {}
+        });
     } catch (error: Error | any) {
-        ErrorResponse.error = { errors: error };
         res
             .status(error.statusCode || 500)
-            .json(ErrorResponse);
+            .json({
+                Success: false,
+                Message: error?.message,
+                Data: {},
+                Error: { ...error }
+            });
     }
 }
 

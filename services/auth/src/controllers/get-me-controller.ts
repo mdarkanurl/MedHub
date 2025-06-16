@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import UserService from "../services";
-import { ErrorResponse, SuccessResponse } from "../utils/common";
 import { CustomRequest } from "../utils/customReq";
 
 
@@ -10,16 +9,22 @@ const getMe = async (
 ) => {
     try {
         const users = await UserService.getMe({ req });
-        
-        SuccessResponse.message = "User successfully found";
-        SuccessResponse.data = users;
 
-        res.status(201).json(SuccessResponse);
+        res.status(201).json({
+            Success: true,
+            Message: 'User successfully found',
+            Data: users,
+            Error: {}
+        });
     } catch (error: Error | any) {
-        ErrorResponse.error = { errors: error };
         res
             .status(error.statusCode || 500)
-            .json(ErrorResponse);
+            .json({
+                Success: false,
+                Message: error?.message,
+                Data: {},
+                Error: { ...error }
+            });
     }
 }
 
