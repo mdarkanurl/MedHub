@@ -26,80 +26,9 @@ model User {
   name      String?
   email     String   @unique
   password  String
-  profilePicture String?
-  phone     String?
-  birthDate DateTime?
-  role      Role     @default(USER)
+  verificationCode Int?
+  isVerifyed Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Doctor {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  password  String
-  profilePicture String?
-  phone     String?
-  birthDate DateTime?
-  description String
-  category   String
-  education String
-  adminId String
-  role      Role     @default(DOCTOR)
-  ratings Rating[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Receptionist {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  password  String
-  profilePicture String?
-  phone     String?
-  birthDate DateTime?
-  contactInfo String
-  workingHours String
-  adminId String
-  role      Role     @default(RECEPTIONIST)
-  ratings Rating[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Nurse {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  password  String
-  profilePicture String?
-  phone     String?
-  birthDate DateTime?
-  workingHours String
-  adminId String
-  role      Role     @default(NURSE)
-  ratings Rating[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Rating {
-  id              String         @id @default(cuid())
-  doctorId        String?
-  nurseId         String?
-  receptionistId  String?
-  rating          Int?
-  comment         String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  doctor          Doctor?        @relation(fields: [doctorId], references: [id])
-  nurse           Nurse?         @relation(fields: [nurseId], references: [id])
-  receptionist    Receptionist?  @relation(fields: [receptionistId], references: [id])
-
-  @@unique([doctorId])
-  @@unique([nurseId])
-  @@unique([receptionistId])
 }
