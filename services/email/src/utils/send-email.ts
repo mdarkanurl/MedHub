@@ -1,5 +1,11 @@
+import { stat } from "fs";
 import { Resend } from "resend";
-import AppError from "./errors/app-error";
+
+interface ResendError {
+    statusCode: number,
+    message: string,
+    name: string
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY || "your-api-key");
 
@@ -13,10 +19,15 @@ async function sendEmail(userData: { subject: string; body: string; to: string }
 
   if (error) {
     console.error("Error sending email:", error);
-    throw new AppError(`Failed to send email: ${error.message}`, 500);
+    return {
+      message: error.message,
+      name: error.name,
+    };
   }
 
-    return data;
+    return {
+      id: data?.id
+    };
 };
 
 export default sendEmail;

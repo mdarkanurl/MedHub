@@ -1,7 +1,7 @@
 import e, { Request, Response, NextFunction } from "express";
 import emailSchema from "../schema/sendEmail";
-import { ErrorResponse } from "../utils/common";
 import { saveEmail } from "../services";
+import AppError from "../utils/errors/app-error";
 
 const sendEmail = async (
     req: Request,
@@ -13,10 +13,12 @@ const sendEmail = async (
         const parseBody = emailSchema.safeParse(req.body);
 
         if(!parseBody.success) {
-            ErrorResponse.message = "Invalid request body";
-            ErrorResponse.error = parseBody.error.errors;
-
-            res.status(400).json(ErrorResponse);
+            res.status(400).json({
+                Success: false,
+                Message: 'Invalid request body',
+                Data: {},
+                Error: parseBody.error.errors
+            });
             return;
         }
 
@@ -27,15 +29,21 @@ const sendEmail = async (
             to: parseBody.data.to
         });
 
-        ErrorResponse.message = "Email sent successfully";
-        ErrorResponse.data = sendEmail;
-
-        res.status(201).json(ErrorResponse);
-    } catch (error: any) {
-        ErrorResponse.error = { errors: error };
+        res.status(201).json({
+            Success: true,
+            Message: 'Email sent successfully',
+            Data: sendEmail,
+            Error: {}
+        });
+    } catch (error: AppError | any) {
         res
             .status(error.statusCode || 500)
-            .json(ErrorResponse);
+            .json({
+                Success: false,
+                Message: error?.message,
+                Data: {},
+                Error: error
+            });
     }
 }
 

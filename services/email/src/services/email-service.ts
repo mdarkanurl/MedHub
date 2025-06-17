@@ -6,11 +6,16 @@ const emailRepo = new EmailCrudRepo();
 async function saveEmail(data: { subject: string; body: string; to: string }) {
     try {
         // send email using the email repository
-        await sendEmail({
+        const sendEmails = await sendEmail({
             subject: data.subject,
             body: data.body,
             to: data.to
         });
+
+        // Check if there was an error sending the email
+        if (sendEmails.message) {
+            throw new AppError(`Failed to send email: ${sendEmails.message}`, 500);
+        }
 
         // create a record of the email in the database
         const savedEmail = await emailRepo.create({
@@ -26,7 +31,10 @@ async function saveEmail(data: { subject: string; body: string; to: string }) {
 
         return savedEmail;
     } catch (error) {
-        throw new AppError("Failed to save email to database", 500);
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Failed to process email request", 500);
     }
 }
 
@@ -39,7 +47,10 @@ async function getEmails() {
 
         return emails;
     } catch (error) {
-        throw new AppError("Failed to get email from database", 500);
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Failed to process email request", 500);
     }
 }
 

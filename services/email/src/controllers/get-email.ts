@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ErrorResponse, SuccessResponse } from "../utils/common";
 import { getEmails } from "../services";
 
 const getEmail = async (
@@ -9,15 +8,21 @@ const getEmail = async (
     try {
         const emails = await getEmails();
         
-        SuccessResponse.data = emails;
-        SuccessResponse.message = "Emails retrieved successfully";
-        
-        res.status(200).json(SuccessResponse);
+        res.status(200).json({
+            Success: true,
+            Message: 'Emails retrieved successfully',
+            Data: emails,
+            Error: {}
+        });
     } catch (error: any) {
-        ErrorResponse.error = { errors: error };
         res
             .status(error.statusCode || 500)
-            .json(ErrorResponse);
+            .json({
+                Success: false,
+                Message: error?.message,
+                Data: {},
+                Error: { ...error }
+            });
     }
 }
     
