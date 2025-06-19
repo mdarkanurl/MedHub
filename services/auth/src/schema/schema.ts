@@ -15,3 +15,9 @@ export const UserLogoutSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6)
 });
+
+
+export const verifyAccount = z.object({
+    email: z.string().email(),
+    code: z.number()
+});

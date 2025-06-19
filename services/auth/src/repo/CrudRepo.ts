@@ -15,44 +15,69 @@ export class CrudRepo<T extends { id: string }> {
             });
             return users
         } catch (error) {
-            throw new AppError("Failed to create user", 500);
+            throw new AppError("Failed to create records", 500);
         }
     }
 
-    async destroy(id: string): Promise<T> {
-        return await this.model.delete({
+    async destroy(id: string) {
+        try {
+            return await this.model.delete(
+                {
             where: { id },
         });
+        } catch (error) {
+            throw new AppError("Failed to delete records", 500);
+        }
     }
 
-    async get(id: string): Promise<T | null> {
-        return await this.model.findUnique({
+    async get(id: string) {
+        try {
+            return await this.model.findUnique({
             where: { id },
         });
+        } catch (error) {
+            throw new AppError("Failed to get record", 500);
+        }
     }
 
-    async getAll(): Promise<T[]> {
-        return await this.model.findMany();
+    async getAll() {
+        try {
+            return await this.model.findMany();
+        } catch (error) {
+            throw new AppError("Failed to get records", 500);
+        }
     }
 
     async getById(id: string) {
-        return await this.model.findUnique({
+       try {
+         return await this.model.findUnique({
             where: { id },
         });
+       } catch (error) {
+            throw new AppError("Failed to get record", 500);
+       }
     }
 
     async getByEmail(email: string) {
-        const users = await this.model.findUnique({
+        try {
+            const users = await this.model.findUnique({
             where: { email },
         });
 
         return users;
+        } catch (error) {
+            throw new AppError("Failed to get record", 500);
+        }
     }
 
-    async update(id: string, data: Partial<T>): Promise<T> {
-        return await this.model.update({
+    async update(id: string, data: Object) {
+        try {
+            return await this.model.update({
             where: { id },
             data,
         });
+        } catch (error) {
+            throw new AppError("Failed to update record", 500);
+        }
     }
 }

@@ -1,15 +1,15 @@
-import { Request, Response} from "express";
-import { UserCreateSchema } from "../schema";
+import { Request, Response } from "express";
+import { verifyAccount } from "../schema";
 import UserService from "../services";
 
 
-const signup = async (
+const verify = async (
     req: Request,
-    res: Response
+    res: Response,
 ) => {
     try {
         // Validate the request body
-        const parseBody = UserCreateSchema.safeParse(req.body);
+        const parseBody = verifyAccount.safeParse(req.body);
 
         if(!parseBody.success) {
             res.status(400).json({
@@ -22,23 +22,22 @@ const signup = async (
         }
 
 
-        const users = await UserService.createUser(
+        const users = await UserService.verifyAccount(
             {
-                name: parseBody.data.name,
                 email: parseBody.data.email,
-                password: parseBody.data.password
-            }
+                code: parseBody.data.code
+            },
         );
 
 
         res.status(201).json({
             Success: true,
-            Message: 'Verify the account',
+            Message: 'User verify successfully',
             Data: users,
             Error: {}
         });
     } catch (error: Error | any) {
-        res
+       res
             .status(error.statusCode || 500)
             .json({
                 Success: false,
@@ -49,4 +48,4 @@ const signup = async (
     }
 }
 
-export default signup;
+export default verify;

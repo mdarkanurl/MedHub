@@ -6,8 +6,10 @@ const userRepo = new UserCrudRepo();
 import bcrypt from "bcryptjs";
 import { accessTokenFunc, refreshTokenFunv } from "../utils/jwt";
 import { CustomRequest } from "../utils/customReq";
+import { sendData } from "../utils/rabbitmq";
+import generateVerificationCode from "../utils/verification-code";
 
-async function createUser(data: any, res: Response) {
+async function createUser(data: any) {
     try {
         // Check if user already exists
         const existingUser = await userRepo.getByEmail(data.email);
@@ -24,22 +26,55 @@ async function createUser(data: any, res: Response) {
             password: hashedPassword
         });
 
-        // Create a token
-        const refreshToken = refreshTokenFunv(users.id, res);
-        const accessToken = accessTokenFunc(users.id) as string;
+        const verificationCode = generateVerificationCode()
 
-        if (!refreshToken || !accessToken) {
-            throw new AppError("Failed to create token", 500);
-        }
+        // Add the code to database
+        await userRepo.update(users.id, { verificationCode });
+
+        sendData({
+            subject: 'Verify the account',
+            body: `Here's the verification code → ${verificationCode} verify the account`,
+            to: users.email
+        });
 
         return {
             user: {
                 id: users.id,
                 email: users.email,
                 name: users.name,
-            },
-            accessToken
+            }
         };
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
+async function verifyAccount(data: { code: number, email: string, res: Response }) {
+    try {
+        const users = await userRepo.getByEmail(data.email);
+
+        if(!users) {
+            throw new AppError('User not found', 400);
+        }
+
+        if(data.code !== users.verificationCode) {
+            throw new AppError('Invalid verification code', 400);
+        }
+
+        const changeIsVerifyed = await userRepo.update(data.email, {verificationCode: true});
+
+        // Create a token
+        const refreshToken = refreshTokenFunv(users.id, data.res);
+        const accessToken = accessTokenFunc(users.id) as string;
+
+        if (!refreshToken || !accessToken) {
+            throw new AppError("Failed to create token", 500);
+        }
+
+        return changeIsVerifyed;
     } catch (error) {
         if (error instanceof AppError) {
             throw error;
@@ -55,6 +90,11 @@ async function loginUser(data: { email: string, password: string, res: Response 
 
         if(!users) {
             throw new AppError('Invalid email', 400);
+        }
+
+        // Check if user verifyed or not
+        if(users.isVerifyed === false) {
+            throw new AppError('Not verify', 403);
         }
 
         // Check the password
@@ -141,5 +181,6 @@ export default createUser;
 export {
     loginUser,
     logoutUser,
-    getMe
+    getMe,
+    verifyAccount
 }

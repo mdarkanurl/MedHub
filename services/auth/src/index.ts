@@ -2,6 +2,7 @@ import express from "express";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import apiRoutes from "./routes";
+import { connect } from "../src/utils/rabbitmq";
 config();
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(cookieParser())
 app.use('/api', apiRoutes);
 
 const PORT = process.env.PORT || 4004
-app.listen(PORT, () => {
-    console.log(`App is running at PORT ${PORT}`)
+app.listen(PORT, async () => {
+    console.log(`App is running at PORT ${PORT}`);
+    await connect();
+    console.log('RabbitMQ conncted');
 });
