@@ -263,6 +263,37 @@ async function verifyForgotPasswordCode(data: { password: string, code: string }
     }
 }
 
+async function changePassword(data: { email: string, currentPassword: string, newPassword: string }) {
+    try {
+        const users = await userRepo.getByEmail(data.email);
+
+        if(!users) {
+            throw new AppError('Invalid email', 400);
+        }
+
+        const isPasswordValid = await bcrypt.compare(data.currentPassword, users.password);
+
+        if(!isPasswordValid) {
+            throw new AppError('Invalid password', 400);
+        }
+
+        await userRepo.update(users.id, { password: data.newPassword });
+        sendData({
+            subject: 'You\'ve changed your password',
+            body: `You\'ve successfully changed your password`,
+            to: users.email
+        });
+        return;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+
+
+}
+
 export default createUser;
 export {
     verifyAccount,
@@ -270,5 +301,6 @@ export {
     logoutUser,
     getMe,
     forgotPassword,
-    verifyForgotPasswordCode
+    verifyForgotPasswordCode,
+    changePassword
 }

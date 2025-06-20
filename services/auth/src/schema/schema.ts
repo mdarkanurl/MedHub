@@ -30,3 +30,10 @@ export const forgotPasswordSchema = z.object({
 export const verifyForgotPasswordCodeSchema = z.object({
     password: z.string().min(6)
 });
+
+
+export const changePasswordSchema = z.object({
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+    email: z.string().email()
+});
