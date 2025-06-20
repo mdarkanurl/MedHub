@@ -7,3 +7,4 @@ export { default as verify } from "./verify-account-controllers";
 export { default as forgotPass } from "./forgot-password-controller";
 export { default as verifyForgotPasswordCode } from "./verify-forgot-password-code";
 export { default as changePassword } from "./change-password";
+export { default as deleteAccount } from "./delete-account-controller";

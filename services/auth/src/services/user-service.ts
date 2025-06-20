@@ -294,13 +294,45 @@ async function changePassword(data: { email: string, currentPassword: string, ne
 
 }
 
-export default createUser;
+async function deleteUser(data: { email: string, password: string }) {
+    try {
+        const users = await userRepo.getByEmail(data.email);
+
+        if(!users) {
+            throw new AppError('Invalid email', 400);
+        }
+
+        const isPasswordValid = await bcrypt.compare(data.password, users.password);
+
+        if(!isPasswordValid) {
+            throw new AppError('Invalid password', 400);
+        }
+
+        // Delete the user
+        await userRepo.destroy(users.id);
+        sendData({
+            subject: 'You\'ve delete your account',
+            body: `You\'ve successfully delete your account`,
+            to: users.email
+        });
+        return;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
+
 export {
+    createUser,
     verifyAccount,
     loginUser,
     logoutUser,
     getMe,
     forgotPassword,
     verifyForgotPasswordCode,
-    changePassword
+    changePassword,
+    deleteUser
 }

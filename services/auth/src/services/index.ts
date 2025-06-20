@@ -1,12 +1,13 @@
-import createUser from './user-service';
 import {
+    createUser,
     loginUser,
     logoutUser,
     getMe,
     verifyAccount,
     forgotPassword,
     verifyForgotPasswordCode,
-    changePassword
+    changePassword,
+    deleteUser
 } from './user-service';
 
 const UserService = {
@@ -17,7 +18,8 @@ const UserService = {
     verifyAccount,
     forgotPassword,
     verifyForgotPasswordCode,
-    changePassword
+    changePassword,
+    deleteUser
 };
 
 export default UserService;

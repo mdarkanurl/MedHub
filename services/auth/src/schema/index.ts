@@ -5,5 +5,6 @@ export {
     verifyAccountSchema,
     forgotPasswordSchema,
     verifyForgotPasswordCodeSchema,
-    changePasswordSchema
+    changePasswordSchema,
+    deleteAccountSchema
 } from "./schema";
