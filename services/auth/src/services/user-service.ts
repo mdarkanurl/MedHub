@@ -1,13 +1,15 @@
 import { UserCrudRepo } from "../repo";
-import { Response } from "express";
-import AppError from "../utils/errors/app-error";
-const userRepo = new UserCrudRepo();
-
-import bcrypt from "bcryptjs";
 import { accessTokenFunc, refreshTokenFunv } from "../utils/jwt";
 import { CustomRequest } from "../utils/customReq";
 import { sendData } from "../utils/rabbitmq";
 import generateVerificationCode from "../utils/verification-code";
+import AppError from "../utils/errors/app-error";
+import prisma from "../prisma";
+const userRepo = new UserCrudRepo();
+
+import bcrypt from "bcryptjs";
+import { v4 as uuidv4 } from 'uuid';
+import { Response } from "express";
 
 async function createUser(data: any) {
     try {
@@ -29,9 +31,9 @@ async function createUser(data: any) {
         const verificationCode = generateVerificationCode();
 
         // Add the code to database
-        const CodeExpiredTime = new Date(); // This gets the current date and time
-        CodeExpiredTime.setMinutes(CodeExpiredTime.getMinutes() + 5); 
-        await userRepo.update(users.id, { verificationCode, CodeExpiredTime });
+        const verificationCodeExpiredTime = new Date(); // This gets the current date and time
+        verificationCodeExpiredTime.setMinutes(verificationCodeExpiredTime.getMinutes() + 5); 
+        await userRepo.update(users.id, { verificationCode, verificationCodeExpiredTime });
 
         sendData({
             subject: 'Verify the account',
@@ -188,20 +190,67 @@ async function getMe(data: { req: CustomRequest }) {
 
 async function forgotPassword(data: { email: string }) {
     try {
-        const users: any = userRepo.getByEmail(data.email);
+        const users = await userRepo.getByEmail(data.email);
 
         if(!users) {
             throw new AppError('Invalid email', 400);
         }
 
-        // Generate code and set expire time
-        const verificationCode = generateVerificationCode();
-        const CodeExpiredTime = new Date(); // This gets the current date and time
-        CodeExpiredTime.setMinutes(CodeExpiredTime.getMinutes() + 2);
+        // Generate uuid and set expire time
+        const forgotPasswordCode = uuidv4();
+        const forgotPasswordCodeExpiredTime = new Date(); // This gets the current date and time
+        forgotPasswordCodeExpiredTime.setMinutes(forgotPasswordCodeExpiredTime.getMinutes() + 2);
+
+        // update the user info
+        try {
+            await prisma.user.update(
+                {
+            where: { email: data.email },
+            data: {
+                forgotPasswordCode: forgotPasswordCode,
+                forgotPasswordCodeExpiredTime: forgotPasswordCodeExpiredTime
+            }
+        }   
+            );
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new AppError("Internal server error", 500);
+        }
         sendData({
             subject: 'Reset the password',
-            body: `Here's the link go there and reset your password ${process.env.WEB_URL}/reset-password/${verificationCode}.
+            body: `Here's the link go there and reset your password ${process.env.WEB_URL}/reset-password/${forgotPasswordCode}.
                     It'll expire within 2 min`,
+            to: users.email
+        });
+
+        return;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
+async function verifyForgotPasswordCode(data: { password: string, code: string }) {
+    try {
+        const users = await prisma.user.findFirst(
+            {
+                where: { forgotPasswordCode: data.code }
+            }
+        );
+
+        if(!users) {
+            throw new AppError('Invalid url to reset password', 400);
+        }
+
+        await userRepo.update(users.id, { password: data.password });
+
+        sendData({
+            subject: 'Password successfully updated',
+            body: `Your password successfully updated`,
             to: users.email
         });
 
@@ -221,4 +270,5 @@ export {
     logoutUser,
     getMe,
     forgotPassword,
+    verifyForgotPasswordCode
 }

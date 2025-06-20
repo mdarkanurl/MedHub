@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { verifyAccount } from "../schema";
+import { verifyAccountSchema } from "../schema";
 import UserService from "../services";
 
 
@@ -9,7 +9,7 @@ const verify = async (
 ) => {
     try {
         // Validate the request body
-        const parseBody = verifyAccount.safeParse(req.body);
+        const parseBody = verifyAccountSchema.safeParse(req.body);
 
         if(!parseBody.success) {
             res.status(400).json({
@@ -25,7 +25,8 @@ const verify = async (
         const users = await UserService.verifyAccount(
             {
                 email: parseBody.data.email,
-                code: parseBody.data.code
+                code: parseBody.data.code,
+                res
             },
         );
 

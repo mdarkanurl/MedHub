@@ -17,12 +17,16 @@ export const UserLogoutSchema = z.object({
 });
 
 
-export const verifyAccount = z.object({
+export const verifyAccountSchema = z.object({
     email: z.string().email(),
     code: z.number()
 });
 
 
-export const forgotPassword = z.object({
+export const forgotPasswordSchema = z.object({
     email: z.string().email()
+});
+
+export const verifyForgotPasswordCodeSchema = z.object({
+    password: z.string().min(6)
 });

@@ -1,37 +1,39 @@
 import { Request, Response} from "express";
-import { forgotPasswordSchema } from "../schema";
+import { verifyForgotPasswordCodeSchema } from "../schema";
 import UserService from "../services";
 
 
-const forgotPass = async (
+const verifyForgotPasswordCode = async (
     req: Request,
     res: Response
 ) => {
     try {
         // Validate the request body
-        const parseBody = forgotPasswordSchema.safeParse(req.body);
+        const parseBody = verifyForgotPasswordCodeSchema.safeParse(req.body);
+        const forgotPasswordCode: string = req.params.forgotPasswordCode;
 
-        if(!parseBody.success) {
+        if(!parseBody.success || !forgotPasswordCode) {
             res.status(400).json({
                 Success: false,
                 Message: 'Invalid request body',
                 Data: {},
-                Error: parseBody.error.errors
+                Error: parseBody?.error?.errors
             });
             return;
         }
 
 
-        await UserService.forgotPassword(
+        await UserService.verifyForgotPasswordCode(
             {
-                email: parseBody.data.email
+                password: parseBody.data.password,
+                code: forgotPasswordCode
             }
         );
 
 
         res.status(201).json({
             Success: true,
-            Message: 'Check your email to verify',
+            Message: 'Successfully updated password',
             Data: {},
             Error: {}
         });
@@ -47,4 +49,4 @@ const forgotPass = async (
     }
 }
 
-export default forgotPass;
+export default verifyForgotPasswordCode;

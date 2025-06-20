@@ -6,6 +6,7 @@ import getMe from "./get-me-route";
 import refreshToken from "./refresh-token-route";
 import verifyAccount from "./verify-account-route";
 import forgotPass from "./forgot-password-route";
+import forgotPassCodeVerify from "./forgot-password-route";
 const router = Router();
 
 router.use('/signup', signupRoute);
@@ -15,5 +16,6 @@ router.use('/get-me', getMe);
 router.use('/refresh-token', refreshToken);
 router.use('/verify-account', verifyAccount);
 router.use('/forgot-password', forgotPass);
+router.use('/reset-password/:id', forgotPassCodeVerify);
 
 export default router;
