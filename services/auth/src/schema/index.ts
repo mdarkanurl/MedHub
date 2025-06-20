@@ -1,1 +1,1 @@
-export { UserCreateSchema, UserLoginSchema, UserLogoutSchema, verifyAccount } from "./schema";
+export { UserCreateSchema, UserLoginSchema, UserLogoutSchema, verifyAccount, forgotPassword } from "./schema";

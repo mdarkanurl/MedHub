@@ -26,14 +26,16 @@ async function createUser(data: any) {
             password: hashedPassword
         });
 
-        const verificationCode = generateVerificationCode()
+        const verificationCode = generateVerificationCode();
 
         // Add the code to database
-        await userRepo.update(users.id, { verificationCode });
+        const CodeExpiredTime = new Date(); // This gets the current date and time
+        CodeExpiredTime.setMinutes(CodeExpiredTime.getMinutes() + 5); 
+        await userRepo.update(users.id, { verificationCode, CodeExpiredTime });
 
         sendData({
             subject: 'Verify the account',
-            body: `Here's the verification code → ${verificationCode} verify the account`,
+            body: `Here's the verification code → ${verificationCode} verify the account. Verify the account within 5 min`,
             to: users.email
         });
 
@@ -60,11 +62,15 @@ async function verifyAccount(data: { code: number, email: string, res: Response 
             throw new AppError('User not found', 400);
         }
 
+        if(users.CodeExpiredTime < new Date()) { // 5:28 then => 5:35 now
+            throw new AppError('Verification code has expired', 400);
+        }
+
         if(data.code !== users.verificationCode) {
             throw new AppError('Invalid verification code', 400);
         }
 
-        const changeIsVerifyed = await userRepo.update(data.email, {verificationCode: true});
+        const changeIsVerifyed = await userRepo.update(data.email, {verificationCode: undefined, isVerifyed: true});
 
         // Create a token
         const refreshToken = refreshTokenFunv(users.id, data.res);
@@ -74,7 +80,10 @@ async function verifyAccount(data: { code: number, email: string, res: Response 
             throw new AppError("Failed to create token", 500);
         }
 
-        return changeIsVerifyed;
+        return {
+            accessToken,
+            changeIsVerifyed
+        };
     } catch (error) {
         if (error instanceof AppError) {
             throw error;
@@ -177,10 +186,38 @@ async function getMe(data: { req: CustomRequest }) {
     }
 }
 
+async function forgotPassword(data: { email: string }) {
+    try {
+        const users: any = userRepo.getByEmail(data.email);
+
+        if(!users) {
+            throw new AppError('Invalid email', 400);
+        }
+
+        // Generate code and set expire time
+        const verificationCode = generateVerificationCode();
+        const CodeExpiredTime = new Date(); // This gets the current date and time
+        CodeExpiredTime.setMinutes(CodeExpiredTime.getMinutes() + 2);
+        sendData({
+            subject: 'Reset the password',
+            body: `Here's the verification code → ${verificationCode} to reset your password. Code will expire within 5 min`,
+            to: users.email
+        });
+
+        return;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
 export default createUser;
 export {
+    verifyAccount,
     loginUser,
     logoutUser,
     getMe,
-    verifyAccount
+    forgotPassword,
 }

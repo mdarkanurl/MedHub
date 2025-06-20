@@ -21,3 +21,8 @@ export const verifyAccount = z.object({
     email: z.string().email(),
     code: z.number()
 });
+
+
+export const forgotPassword = z.object({
+    email: z.string().email()
+});

@@ -27,6 +27,8 @@ model User {
   email     String   @unique
   password  String
   verificationCode Int?
+  forgotPasswordCode Int?
+  CodeExpiredTime DateTime?
   isVerifyed Boolean @default(false)
 
   createdAt DateTime @default(now())
