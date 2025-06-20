@@ -200,7 +200,8 @@ async function forgotPassword(data: { email: string }) {
         CodeExpiredTime.setMinutes(CodeExpiredTime.getMinutes() + 2);
         sendData({
             subject: 'Reset the password',
-            body: `Here's the verification code → ${verificationCode} to reset your password. Code will expire within 5 min`,
+            body: `Here's the link go there and reset your password ${process.env.WEB_URL}/reset-password/${verificationCode}.
+                    It'll expire within 2 min`,
             to: users.email
         });
 
