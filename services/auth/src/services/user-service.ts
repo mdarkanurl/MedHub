@@ -324,6 +324,20 @@ async function deleteUser(data: { email: string, password: string }) {
     }
 }
 
+async function updateProfile(data: { name: string, req: CustomRequest }) {
+    try {
+        const userId = data.req.userId as string;
+        const updateName = await userRepo.update(userId,  { name: data.name });
+
+        return updateName;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
 
 export {
     createUser,
@@ -334,5 +348,6 @@ export {
     forgotPassword,
     verifyForgotPasswordCode,
     changePassword,
-    deleteUser
+    deleteUser,
+    updateProfile
 }

@@ -7,7 +7,8 @@ import {
     forgotPassword,
     verifyForgotPasswordCode,
     changePassword,
-    deleteUser
+    deleteUser,
+    updateProfile
 } from './user-service';
 
 const UserService = {
@@ -19,7 +20,8 @@ const UserService = {
     forgotPassword,
     verifyForgotPasswordCode,
     changePassword,
-    deleteUser
+    deleteUser,
+    updateProfile
 };
 
 export default UserService;

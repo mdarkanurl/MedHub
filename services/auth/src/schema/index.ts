@@ -6,5 +6,6 @@ export {
     forgotPasswordSchema,
     verifyForgotPasswordCodeSchema,
     changePasswordSchema,
-    deleteAccountSchema
+    deleteAccountSchema,
+    updateProfileSchema
 } from "./schema";

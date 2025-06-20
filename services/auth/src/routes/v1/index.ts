@@ -9,6 +9,7 @@ import forgotPass from "./forgot-password-route";
 import forgotPassCodeVerify from "./forgot-password-route";
 import changePassword from "./change-password-route";
 import deleteAccount from "./delete-account";
+import updateProfile from "./update-profile-route";
 const router = Router();
 
 router.use('/signup', signupRoute);
@@ -21,5 +22,6 @@ router.use('/forgot-password', forgotPass);
 router.use('/reset-password/:id', forgotPassCodeVerify);
 router.use('/change-password', changePassword);
 router.use('/delete-account', deleteAccount);
+router.use('/update-profile', updateProfile);
 
 export default router;
