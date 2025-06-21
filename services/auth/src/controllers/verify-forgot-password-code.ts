@@ -10,7 +10,7 @@ const verifyForgotPasswordCode = async (
     try {
         // Validate the request body
         const parseBody = verifyForgotPasswordCodeSchema.safeParse(req.body);
-        const forgotPasswordCode: string = req.params.forgotPasswordCode;
+        const forgotPasswordCode: string = req.params.id;
 
         if(!parseBody.success || !forgotPasswordCode) {
             res.status(400).json({
@@ -23,7 +23,7 @@ const verifyForgotPasswordCode = async (
         }
 
 
-        await UserService.verifyForgotPasswordCode(
+        const isChanged = await UserService.verifyForgotPasswordCode(
             {
                 password: parseBody.data.password,
                 code: forgotPasswordCode
@@ -34,7 +34,7 @@ const verifyForgotPasswordCode = async (
         res.status(201).json({
             Success: true,
             Message: 'Successfully updated password',
-            Data: {},
+            Data: isChanged,
             Error: {}
         });
     } catch (error: Error | any) {

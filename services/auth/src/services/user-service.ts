@@ -8,6 +8,8 @@ import prisma from "../prisma";
 const userRepo = new UserCrudRepo();
 
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+dotenv.config();
 import { v4 as uuidv4 } from 'uuid';
 import { Response } from "express";
 
@@ -244,13 +246,26 @@ async function verifyForgotPasswordCode(data: { password: string, code: string }
             {
                 where: { forgotPasswordCode: data.code }
             }
-        );
-
+        ) as any;
+        
         if(!users) {
             throw new AppError('Invalid url to reset password', 400);
         }
 
-        await userRepo.update(users.id, { password: data.password });
+        if(users.forgotPasswordCodeExpiredTime < new Date()) { // 5:28 then => 5:35 now
+            throw new AppError('Reset password code has expired', 400);
+        }
+
+        const hashThePassword = await bcrypt.hash(data.password, 10);
+
+        const isChanged = await userRepo.update(
+            users.id,
+            {
+                password: hashThePassword,
+                forgotPasswordCode: null,
+                forgotPasswordCodeExpiredTime: null
+            }
+        );
 
         sendData({
             subject: 'Password successfully updated',
@@ -258,7 +273,13 @@ async function verifyForgotPasswordCode(data: { password: string, code: string }
             to: users.email
         });
 
-        return;
+        return {
+            user: {
+                id: isChanged.id,
+                email: isChanged.email,
+                name: isChanged.name,
+            }
+        };
     } catch (error) {
         if (error instanceof AppError) {
             throw error;

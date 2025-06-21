@@ -2,6 +2,6 @@ import express from "express";
 import { verifyForgotPasswordCode } from "../../controllers";
 const router = express.Router();
 
-router.post("/", verifyForgotPasswordCode);
+router.put("/:id", verifyForgotPasswordCode);
 
 export default router;
