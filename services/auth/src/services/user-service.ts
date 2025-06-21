@@ -64,7 +64,7 @@ async function verifyAccount(data: { code: number, email: string, res: Response 
             throw new AppError('User not found', 400);
         }
 
-        if(users.CodeExpiredTime < new Date()) { // 5:28 then => 5:35 now
+        if(users.verificationCodeExpiredTime < new Date()) { // 5:28 then => 5:35 now
             throw new AppError('Verification code has expired', 400);
         }
 
@@ -72,7 +72,7 @@ async function verifyAccount(data: { code: number, email: string, res: Response 
             throw new AppError('Invalid verification code', 400);
         }
 
-        const changeIsVerifyed = await userRepo.update(data.email, {verificationCode: undefined, isVerifyed: true});
+        const changeIsVerifyed = await userRepo.update(users.id, {verificationCode: null, verificationCodeExpiredTime: null, isVerifyed: true});
 
         // Create a token
         const refreshToken = refreshTokenFunv(users.id, data.res);
@@ -84,7 +84,11 @@ async function verifyAccount(data: { code: number, email: string, res: Response 
 
         return {
             accessToken,
-            changeIsVerifyed
+            users: {
+                id: changeIsVerifyed.id,
+                email: changeIsVerifyed.email,
+                name: changeIsVerifyed.name,
+            }
         };
     } catch (error) {
         if (error instanceof AppError) {

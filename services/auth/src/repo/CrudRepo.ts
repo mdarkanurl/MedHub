@@ -63,21 +63,21 @@ export class CrudRepo<T extends { id: string }> {
             const users = await this.model.findUnique({
             where: { email },
         });
-
+        
         return users;
         } catch (error) {
             throw new AppError("Failed to get record", 500);
         }
     }
 
-    async update(id: string, data: Object) {
+    async update(id: string, data: any) {
         try {
             return await this.model.update({
-            where: { id },
-            data,
-        });
+                where: { id },
+                data: { ...data },
+            });
         } catch (error) {
-            throw new AppError("Failed to update record", 500);
+            throw new AppError("Failed to update record from CrudRepo", 500);
         }
     }
 }
