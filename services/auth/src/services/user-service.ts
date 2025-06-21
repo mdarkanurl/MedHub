@@ -129,6 +129,12 @@ async function loginUser(data: { email: string, password: string, res: Response 
             throw new AppError("Failed to create token", 500);
         }
 
+        sendData({
+            subject: 'You\'ve logged in',
+            body: `You\'ve successfully logged in`,
+            to: users.email
+        });
+
         return {
             userId: users.id,
             email: users.email,
@@ -160,6 +166,12 @@ async function logoutUser(data: {email: string, password: string, res: Response 
 
         // Clear the cookie
         data.res.cookie("token", '');
+        sendData({
+            subject: 'You\'ve logged out',
+            body: `You\'ve successfully logged out`,
+            to: users.email
+        });
+        return;
     } catch (error) {
         if (error instanceof AppError) {
             throw error;
