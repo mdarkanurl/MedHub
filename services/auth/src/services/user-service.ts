@@ -302,13 +302,22 @@ async function changePassword(data: { email: string, currentPassword: string, ne
             throw new AppError('Invalid password', 400);
         }
 
-        await userRepo.update(users.id, { password: data.newPassword });
+        const hashThePassword = await bcrypt.hash(data.newPassword, 10);
+        const isChangedPassword = await userRepo.update(users.id, { password: hashThePassword });
+
         sendData({
             subject: 'You\'ve changed your password',
             body: `You\'ve successfully changed your password`,
             to: users.email
         });
-        return;
+
+        return {
+            user: {
+                id: isChangedPassword.id,
+                email: isChangedPassword.email,
+                name: isChangedPassword.name,
+            }
+        };
     } catch (error) {
         if (error instanceof AppError) {
             throw error;
