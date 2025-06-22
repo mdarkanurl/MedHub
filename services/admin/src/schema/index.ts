@@ -1,3 +1,4 @@
 export {
-    createDoctorSchema
+    createDoctorSchema,
+    createAppointmentSchema
 } from "./schema";

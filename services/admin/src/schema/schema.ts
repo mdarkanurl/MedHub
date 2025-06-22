@@ -8,3 +8,12 @@ export const createDoctorSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6)
 });
+
+export const createAppointmentSchema = z.object({
+    doctorId: z.string(),
+    appointmentStartTime: z.date(),
+    appointmentEndTime: z.date(),
+    totalAppointments: z.number(),
+    perAppointmentCost: z.number(),
+    perAppointmentDuration: z.number(),
+});
