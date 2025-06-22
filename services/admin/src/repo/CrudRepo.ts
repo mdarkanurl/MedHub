@@ -8,7 +8,7 @@ export class CrudRepo<T extends { id: string }> {
         this.model = model;
     }
 
-    async create(data: Partial<T>) {
+    async create(data: Object) {
         try {
             const users = await this.model.create({
                 data,

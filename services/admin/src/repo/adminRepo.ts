@@ -1,10 +1,10 @@
 import prisma from "../prisma";
 import { CrudRepo } from "./CrudRepo";
 
-class UserCrudRepo extends CrudRepo<{ id: string }> {
+class DoctorCrudRepo extends CrudRepo<{ id: string }> {
     constructor() {
-        super(prisma.user);
+        super(prisma.doctor);
     }
 }
 
-export default UserCrudRepo;
+export default DoctorCrudRepo;

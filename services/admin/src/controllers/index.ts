@@ -1,0 +1,1 @@
+export { default as createDoctor} from './create-doctor-controller';
