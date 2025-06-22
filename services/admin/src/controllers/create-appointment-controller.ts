@@ -7,12 +7,12 @@ const createAppointmentController = async (req: Request, res: Response) => {
     try {
         const parseBody = createAppointmentSchema.safeParse(req.body);
 
-        if(!parseBody.success) {
+        if(!parseBody.success || parseBody.data.appointmentStartTime > parseBody.data.appointmentEndTime) { // startTime = 10:30 => endTime = 11:00
             res.status(400).json({
                 Success: false,
                 Message: 'Invalid request body',
                 Data: {},
-                Error: parseBody.error.errors
+                Error: parseBody?.error?.errors
             });
             return;
         }
@@ -21,10 +21,10 @@ const createAppointmentController = async (req: Request, res: Response) => {
         const totalDuration = differenceInMinutes(parseBody.data.appointmentEndTime, parseBody.data.appointmentStartTime);
         const perSessionDuration = totalDuration / parseBody.data.totalAppointments;
 
-        const appointments = appointmentServices.createAppointment({
+        const appointments = await appointmentServices.createAppointment({
             doctorId: parseBody.data.doctorId,
-            appointmentStartTime: parseBody.data.appointmentStartTime,
-            appointmentEndTime: parseBody.data.appointmentEndTime,
+            appointmentStartTime: new Date(parseBody.data.appointmentStartTime),
+            appointmentEndTime: new Date(parseBody.data.appointmentEndTime),
             totalAppointments: parseBody.data.totalAppointments,
             perAppointmentCost: parseBody.data.perAppointmentCost,
             perAppointmentDuration: parseBody.data.perAppointmentDuration,

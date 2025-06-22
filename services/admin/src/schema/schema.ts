@@ -11,8 +11,8 @@ export const createDoctorSchema = z.object({
 
 export const createAppointmentSchema = z.object({
     doctorId: z.string(),
-    appointmentStartTime: z.date(),
-    appointmentEndTime: z.date(),
+    appointmentStartTime: z.string(),
+    appointmentEndTime: z.string(),
     totalAppointments: z.number(),
     perAppointmentCost: z.number(),
     perAppointmentDuration: z.number(),

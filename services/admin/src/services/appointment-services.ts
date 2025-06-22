@@ -1,5 +1,6 @@
 import AppError from "../utils/errors/app-error";
 import { AppointmentCrudRepo } from "../repo";
+import prisma from "../prisma";
 const appointmentRepo = new AppointmentCrudRepo();
 
 async function createAppointment(data: {
@@ -12,24 +13,30 @@ async function createAppointment(data: {
     perSessionDuration: number
 }) {
     try {
-        const isDoctorAvailable = await appointmentRepo.getById(data.doctorId);
+        const doctors = await prisma.doctor.findUnique({
+            where: { id: data.doctorId }
+        });
 
-        if(!isDoctorAvailable) {
+        if(!doctors) {
             throw new AppError('Doctor not found', 404);
         }
 
-        for (let i = 0; i < isDoctorAvailable.length; i++) {
-            if(
-                isDoctorAvailable[i] &&
+        // The doctor is avaliable or not
+        const isDoctorAvailable = await prisma.appointment.findMany({
+            where: { doctorId: doctors.id }
+        });
+
+        for (let i = 0; i < isDoctorAvailable.length; i++) { // appointmentEndTime = 2:20pm => appointmentStartTime = 2:00pm
+            if(isDoctorAvailable[i] &&
                 isDoctorAvailable[i].appointmentStartTime === data.appointmentStartTime ||
-                isDoctorAvailable[i].appointmentEndTime > data.appointmentStartTime // appointmentEndTime 2:30pm => startTime 2:15pm
+                isDoctorAvailable[i].appointmentEndTime > data.appointmentStartTime
             ) {
-                throw new AppError('Doctor is not available at this time', 400);
+                throw new AppError('Doctor not avaliable at this time zone', 400);
             }
         }
 
-        const appointment = await appointmentRepo.create(data);
-        return appointment;
+        const createAppointments = await appointmentRepo.create(data);
+        return createAppointments;
     } catch (error) {
         if (error instanceof AppError) {
             throw error;
@@ -55,7 +62,7 @@ async function bookAppointment(data: {
         }
 
         // Book an appointment
-        const bookAppointment = await appointmentRepo.update(appointments.id, data);
+        const bookAppointment = await appointmentRepo.update(appointments.id, { patientId: [...appointments.patientId, ...data.patientId] });
         return bookAppointment;
     } catch (error) {
         if (error instanceof AppError) {

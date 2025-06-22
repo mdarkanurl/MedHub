@@ -35,8 +35,8 @@ async function createDoctor(
             education: doctor.education
         }
     } catch (error) {
-        if(error instanceof AppError) {
-            throw error
+         if (error instanceof AppError) {
+            throw error;
         }
         throw new AppError("Internal server error", 500);
     }

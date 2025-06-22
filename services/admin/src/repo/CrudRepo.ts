@@ -72,12 +72,15 @@ export class CrudRepo<T extends { id: string }> {
 
     async update(id: string, data: any) {
         try {
-            return await this.model.update({
+            console.log('Data is, ', id, data);
+            const x = await this.model.update({
                 where: { id },
                 data: { ...data },
             });
+            console.log(x);
+            return x;
         } catch (error) {
-            throw new AppError("Failed to update record from CrudRepo", 500);
+            throw new AppError("Failed to update record", 500);
         }
     }
 }

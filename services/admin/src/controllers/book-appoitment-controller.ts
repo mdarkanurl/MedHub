@@ -16,7 +16,7 @@ const bookAppointmentController = async (req: Request, res: Response) => {
             return;
         }
 
-        const appointments = appointmentServices.bookAppointment({
+        const appointments = await appointmentServices.bookAppointment({
             appointmentId: parseBody.data.appointmentId,
             patientId: parseBody.data.patientId
         });

@@ -19,7 +19,7 @@ const createDoctor = async (
             return;
         }
 
-        const doctors = doctorServices.createDoctor({
+        const doctors = await doctorServices.createDoctor({
             name: parseBody.data.name,
             education: parseBody.data.education,
             specialization: parseBody.data.specialization,
@@ -36,11 +36,11 @@ const createDoctor = async (
         });
         return;
     } catch (error: any) {
-        res
+       res
             .status(error.statusCode || 500)
             .json({
                 Success: false,
-                Message: error.message,
+                Message: error?.message,
                 Data: {},
                 Error: { ...error }
             });
