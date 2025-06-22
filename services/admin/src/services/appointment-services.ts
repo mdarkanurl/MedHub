@@ -38,6 +38,34 @@ async function createAppointment(data: {
     }
 }
 
+async function bookAppointment(data: {
+    appointmentId: string,
+    patientId: string[]
+}) {
+    try {
+        const appointments = await appointmentRepo.getById(data.appointmentId);
+
+        if(!appointments) {
+            throw new AppError('Appointment doesn\'t found', 400);
+        }
+
+        // Check if session is available or not
+        if((appointments.patientId).length === appointments.totalAppointments) { // totalAppointments is 7 => 1
+            throw new AppError('The session doesn\'t available. It\'s alreay booked', 400);
+        }
+
+        // Book an appointment
+        const bookAppointment = await appointmentRepo.update(appointments.id, data);
+        return bookAppointment;
+    } catch (error) {
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError("Internal server error", 500);
+    }
+}
+
 export {
-    createAppointment
+    createAppointment,
+    bookAppointment
 }

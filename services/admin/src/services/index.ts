@@ -1,11 +1,12 @@
 import { createDoctor } from "./doctor-service"
-import { createAppointment } from "./appointment-services"
+import { createAppointment, bookAppointment } from "./appointment-services"
 const doctorServices = {
     createDoctor
 }
 
 const appointmentServices = {
-    createAppointment
+    createAppointment,
+    bookAppointment
 }
 
 export {

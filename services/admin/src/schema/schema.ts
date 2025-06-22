@@ -17,3 +17,8 @@ export const createAppointmentSchema = z.object({
     perAppointmentCost: z.number(),
     perAppointmentDuration: z.number(),
 });
+
+export const bookAppointmentSchema = z.object({
+    appointmentId: z.string(),
+    patientId: z.array(z.string()).min(1)
+});
