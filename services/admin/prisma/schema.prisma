@@ -14,17 +14,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Doctor {
   id        String   @id @default(cuid())
-  name      String?
+  name      String
+  education String
+  specialization String
+  description String
   email     String   @unique
   password  String
-  verificationCode Int?
-  forgotPasswordCode String?
-  verificationCodeExpiredTime DateTime?
-  forgotPasswordCodeExpiredTime DateTime?
-  isVerifyed Boolean @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  doctorId    String
+  patientId   String[]
+  appointmentStartTime DateTime
+  appointmentEndTime DateTime
+  totalAppointments Int
+  perAppointmentCost Float
+  perAppointmentDuration Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
