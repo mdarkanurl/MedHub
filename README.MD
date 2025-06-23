@@ -296,8 +296,8 @@ The MedHub medical management system has been fully implemented with all core fe
 
 For support and questions:
 - Create an issue in the repository
-- Contact the development team
-- Check the documentation for common issues
+- Contact with me via this email => mdarkanurl@gmail.com
+- Check the code and try to resolve it or email me
 
 ---
 
